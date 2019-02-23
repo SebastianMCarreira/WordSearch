@@ -1,16 +1,11 @@
-from random import randint
+from random import randint, sample
 
 class Board():
     def __init__(self, width, height):
         self.width = width
         self.height = height
         self.hiddenWords = []
-        self.board = []
-        for _ in range(height):
-            row = []
-            for _ in range(width):
-                row.append(" ")
-            self.board.append(row)
+        self.board = [[" "  for _ in range(width)] for _ in range (height)]
 
     def __str__(self):
         board_str = ""
@@ -20,37 +15,36 @@ class Board():
 
     
     def addWord(self, word):
-        if (word.x1 in range(0, self.width-1) and word.x2 in range(0, self.width-1) and 
-            word.y1 in range(0, self.height-1) and word.y2 in range(0, self.height-1)):
-            if word.vert:
-                for i, letter in enumerate(word.word):
-                   self.board[word.y1+i][word.x1] = letter
-            else:
-                for i, letter in enumerate(word.word):
-                    self.board[word.y1][word.x1+i] = letter
-        else:
-            raise ValueError("The word does not fit with the specified coordinates ({},{}) and length {}".format(
-                                                                                word.x1,word.y1,len(word.word)))
+        length = len(word)
+        hidWord = HiddenWord(word,self.width-length,self.height-length)
+        for coord, letter in zip(hidWord.spaces, hidWord.word):
+            self.board[coord[1]][coord[0]] = letter
 
 
 
 class HiddenWord():
-    def __init__(self, word, x1, y1, vert):
-        self.vert = vert
+    def __init__(self, word, limit_x, limit_y):
+        self.vert = bool(randint(0,1)) # True if the word is vertical, False if horizontal, diagonals for the future
 
-        self.word = word
-        self.letters = list(set(word))
+        self.word = word # The actual word to search
+        # self.letters = list(set(word))
 
-        self.x1 = x1
-        self.y1 = y1
-        if vert:
-            self.x2 = x1
-            self.y2 = y1 + len(word)
-        else:
-            self.y2 = y1
-            self.x2 = x1 + len(word)
+        self.spaces = [(randint(0,limit_x),randint(0,limit_y))]
+        self.calculateSpaces(limit_x, limit_y)
+ 
+    def calculateSpaces(self, x, y):
+        for _ in self.word:
+            lastCoord = self.spaces[-1]
+            if self.vert:
+                self.spaces.append((lastCoord[0],lastCoord[1]+1))
+            else:
+                self.spaces.append((lastCoord[0]+1,lastCoord[1]))
 
-        
+    def rerollCoordinates(self, limit_x, limit_y):
+        self.spaces = [(randint(0,limit_x),randint(0,limit_y))]
+        self.calculateSpaces(limit_x, limit_y)
+            
+            
 
 
 
@@ -61,24 +55,18 @@ with open("words.txt") as f:
 width = 15
 height = 15
 amount = 7
-
-
-words_to_search = []
-for x in range(amount):
-    search = True
-    while search:
-        new_word = words[randint(0,words_l)]
-        if new_word not in words_to_search:
-            search = False
-    words_to_search.append(new_word)
-
-for word in words_to_search:
-    if randint(0,1):
-        vert = True
-    else:
-        vert = False
-
-    
 board = Board(width,height)
-board.addWord(HiddenWord("putostotods",10,4,False))
 print(board)
+words_to_search = sample(words, amount)
+print(words_to_search)
+for word in words_to_search:
+    added = True
+    while added:
+        try:
+            board.addWord(word)
+            added = False
+            print("Added: "+word)
+            print(board)
+            print("=======================================")
+        except ValueError:
+            pass
