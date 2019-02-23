@@ -61,21 +61,15 @@ with open("words.txt") as f:
     words = [x.strip() for x in f.readlines()]
     words_l = len(words) - 1
 
-width = 10
-height = 10
+width = 15
+height = 15
 amount = 7
 board = Board(width,height)
 print(board)
 words_to_search = sample(words, amount)
 print(words_to_search)
 for word in words_to_search:
-    added = True
-    while added:
-        try:
-            board.addWord(word)
-            added = False
-            print("Added: "+word)
-            print(board)
-            print("=======================================")
-        except ValueError:
-            pass
+    board.addWord(word)
+    print("Added: "+word)
+    print(board)
+    print("=======================================")
