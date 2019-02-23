@@ -17,6 +17,15 @@ class Board():
     def addWord(self, word):
         length = len(word)
         hidWord = HiddenWord(word,self.width-length,self.height-length)
+
+        isInOccupiedSpaces = True
+        while isInOccupiedSpaces:
+            foundOneOccupied = False
+            for coord, letter in zip(hidWord.spaces, hidWord.word):
+                if self.board[coord[1]][coord[0]] != letter and self.board[coord[1]][coord[0]] != " ":
+                    hidWord.rerollCoordinates(self.width-length,self.height-length)
+                    foundOneOccupied = True
+            isInOccupiedSpaces = foundOneOccupied
         for coord, letter in zip(hidWord.spaces, hidWord.word):
             self.board[coord[1]][coord[0]] = letter
 
@@ -52,8 +61,8 @@ with open("words.txt") as f:
     words = [x.strip() for x in f.readlines()]
     words_l = len(words) - 1
 
-width = 15
-height = 15
+width = 10
+height = 10
 amount = 7
 board = Board(width,height)
 print(board)
