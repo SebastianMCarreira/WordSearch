@@ -1,9 +1,9 @@
-from random import randint, sample, choices
+from random import randint, choices
 from itertools import product
 
-letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
+LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-frequencies = [0.0812, 0.0149, 0.0271, 0.0432, 0.1202, 0.023, 0.0203, 0.0592, 0.0731, 0.001, 0.0069, 0.0398, 0.0261,
+FREQUENCIES = [0.0812, 0.0149, 0.0271, 0.0432, 0.1202, 0.023, 0.0203, 0.0592, 0.0731, 0.001, 0.0069, 0.0398, 0.0261,
                0.0695, 0.0768, 0.0182, 0.0011, 0.0602, 0.0628, 0.091, 0.0288, 0.0111, 0.0209,0.0017, 0.0211, 0.0007]
 
 class Board():
@@ -42,10 +42,7 @@ class Board():
     def fillRandom(self):
         for i,j in product(range(self.height),range(self.width)):
             if self.board[i][j] == " ":
-                self.board[i][j] = choices(population=letters, weights=frequencies)[0]
-
-
-
+                self.board[i][j] = choices(population=LETTERS, weights=FREQUENCIES)[0]
 
 class HiddenWord():
     def __init__(self, word, limit_x, limit_y):
@@ -68,27 +65,3 @@ class HiddenWord():
     def rerollCoordinates(self, limit_x, limit_y):
         self.spaces = [(randint(0,limit_x),randint(0,limit_y))]
         self.calculateSpaces(limit_x, limit_y)
-            
-            
-
-
-
-with open("words.txt") as f:
-    words = [x.strip() for x in f.readlines()]
-    words_l = len(words) - 1
-
-width = 15
-height = 15
-amount = 7
-board = Board(width,height)
-print(board)
-words_to_search = sample(words, amount)
-print(words_to_search)
-for word in words_to_search:
-    board.addWord(word)
-    print("Added: "+word)
-    print(board)
-    print("=======================================")
-
-board.fillRandom()
-print(board)
