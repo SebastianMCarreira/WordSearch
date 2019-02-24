@@ -1,10 +1,35 @@
 from random import randint, choices
 from itertools import product
+from colorama import Back, Fore
 
 LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 FREQUENCIES = [0.0812, 0.0149, 0.0271, 0.0432, 0.1202, 0.023, 0.0203, 0.0592, 0.0731, 0.001, 0.0069, 0.0398, 0.0261,
                0.0695, 0.0768, 0.0182, 0.0011, 0.0602, 0.0628, 0.091, 0.0288, 0.0111, 0.0209,0.0017, 0.0211, 0.0007]
+
+class Cursor():
+    def __init__(self, limit_x, limit_y):
+        self.x = 0
+        self.y = 0
+        self.limit_x = limit_x
+        self.limit_y = limit_y
+
+    def move(self, horizontal, vertical): #Returns True if the cursor moved
+        if horizontal < 0 and self.x != 0:
+            self.x -= 1
+            return True
+        elif horizontal > 0 and self.x != self.limit_x:
+            self.x += 1
+            return True
+        elif vertical < 0 and self.y != 0:
+            self.y -= 1
+            return True
+        elif vertical > 0 and self.y != self.limit_y:
+            self.y += 1
+            return True
+
+        return False
+
 
 class Board():
     def __init__(self, width, height):
@@ -12,12 +37,24 @@ class Board():
         self.height = height
         self.hiddenWords = []
         self.board = [[" "  for _ in range(width)] for _ in range (height)]
+        self.cursor = Cursor(width - 1, height - 1)
 
     def __str__(self):
         board_str = ""
         for row in self.board:
             board_str += " ".join(row) + "\n"
         return board_str
+
+    def show(self):
+        for j,i in product(range(self.height),range(self.width)):
+            if i == self.cursor.x and j == self.cursor.y:
+                print(Fore.RED + self.board[j][i], end=" ")
+            else:
+                print(self.board[j][i], end=" ")
+            
+            if i == self.width - 1:
+                print("")
+            
 
     
     def addWord(self, word):
@@ -43,6 +80,8 @@ class Board():
         for i,j in product(range(self.height),range(self.width)):
             if self.board[i][j] == " ":
                 self.board[i][j] = choices(population=LETTERS, weights=FREQUENCIES)[0]
+
+        
 
 class HiddenWord():
     def __init__(self, word, limit_x, limit_y):
