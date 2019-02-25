@@ -14,17 +14,17 @@ class Cursor():
         self.limit_x = limit_x
         self.limit_y = limit_y
 
-    def move(self, horizontal, vertical): #Returns True if the cursor moved
-        if horizontal < 0 and self.x != 0:
+    def move(self, code): #Returns True if the cursor moved
+        if code == 75 and self.x != 0:
             self.x -= 1
             return True
-        elif horizontal > 0 and self.x != self.limit_x:
+        elif code == 77 and self.x != self.limit_x:
             self.x += 1
             return True
-        elif vertical < 0 and self.y != 0:
+        elif code == 72 and self.y != 0:
             self.y -= 1
             return True
-        elif vertical > 0 and self.y != self.limit_y:
+        elif code == 80 and self.y != self.limit_y:
             self.y += 1
             return True
 
