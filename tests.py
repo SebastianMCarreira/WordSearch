@@ -43,8 +43,12 @@ board.show()
 board.showWords()
 
 def keypress(event):
-    if event.event_type == "down" and board.cursor.move(event.scan_code):
+    if event.event_type == "up":
+        return
+    if board.moveCursor(event.scan_code):
         board.update()
+    elif event.scan_code == 28:
+        board.toggleMarking()
 
 keyboard.hook(keypress)
 keyboard.wait("esc")

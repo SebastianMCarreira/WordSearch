@@ -2,28 +2,14 @@ from random import randint, choices
 from itertools import product
 from colorama import Back, Fore
 
-import os
-
-if os.name == "nt":
-    from ctypes import windll, c_short, c_char_p, Structure
+from auxiliary_functions import moveConsoleCursor, calculateVectorLength
 
 LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 FREQUENCIES = [0.0812, 0.0149, 0.0271, 0.0432, 0.1202, 0.023, 0.0203, 0.0592, 0.0731, 0.001, 0.0069, 0.0398, 0.0261,
                0.0695, 0.0768, 0.0182, 0.0011, 0.0602, 0.0628, 0.091, 0.0288, 0.0111, 0.0209,0.0017, 0.0211, 0.0007]
 
-def moveConsoleCursor(x,y):
-    if os.name == "nt":
-        STD_OUTPUT_HANDLE = -11
- 
-        class COORD(Structure):
-            pass
-        COORD._fields_ = [("X", c_short), ("Y", c_short)]
 
-        h = windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
-        windll.kernel32.SetConsoleCursorPosition(h, COORD(x, y))
-    else:
-        print('\033[{};{}H'.format(str(x+1),str(y+1))) 
 
 class Cursor():
     def __init__(self, limit_x, limit_y):
@@ -34,24 +20,6 @@ class Cursor():
         self.limit_x = limit_x
         self.limit_y = limit_y
 
-    def move(self, code): #Returns True if the cursor moved
-        self.lastX = self.x
-        self.lastY = self.y
-        if code == 75 and self.x != 0:
-            self.x -= 1
-            return True
-        elif code == 77 and self.x != self.limit_x:
-            self.x += 1
-            return True
-        elif code == 72 and self.y != 0:
-            self.y -= 1
-            return True
-        elif code == 80 and self.y != self.limit_y:
-            self.y += 1
-            return True
-
-        return False
-
 
 class Board():
     def __init__(self, width, height):
@@ -60,12 +28,34 @@ class Board():
         self.hiddenWords = []
         self.board = [[" "  for _ in range(width)] for _ in range (height)]
         self.cursor = Cursor(width - 1, height - 1)
+        self.markedSpaces = []
+        self.currentMark = []
+        self.isMarking = False
+        self.wordsFound = 0
 
     def __str__(self):
         board_str = ""
         for row in self.board:
             board_str += " ".join(row) + "\n"
         return board_str
+
+    def moveCursor(self, code): #Returns True if the cursor moved
+        self.cursor.lastX = self.cursor.x
+        self.cursor.lastY = self.cursor.y
+        currentDirection = self.getDirectionOfCurrentMark()
+        if code == 75 and self.cursor.x != 0 and currentDirection in ('horizontal',None):
+            self.cursor.x -= 1
+            return True
+        elif code == 77 and self.cursor.x != self.width - 1 and currentDirection in ('horizontal',None):
+            self.cursor.x += 1
+            return True
+        elif code == 72 and self.cursor.y != 0 and currentDirection in ('vertical',None):
+            self.cursor.y -= 1
+            return True
+        elif code == 80 and self.cursor.y != self.height - 1 and currentDirection in ('vertical',None):
+            self.cursor.y += 1
+            return True
+        return False
 
     def show(self):
         for j,i in product(range(self.height),range(self.width)):
@@ -82,17 +72,39 @@ class Board():
 
     def update(self):
         moveConsoleCursor(self.cursor.lastX*2,self.cursor.lastY)
-        print(self.board[self.cursor.lastY][self.cursor.lastX], end=" ")
+        if self.isMarking:
+            print(Fore.BLACK + Back.WHITE + self.board[self.cursor.lastY][self.cursor.lastX], end=" ")
+        else:
+            print(self.board[self.cursor.lastY][self.cursor.lastX], end=" ")
         moveConsoleCursor(self.cursor.x*2,self.cursor.y)
-        print(Fore.RED + self.board[self.cursor.y][self.cursor.x], end=" ")
+        if self.isMarking:
+            print(Fore.RED + Back.WHITE + self.board[self.cursor.y][self.cursor.x], end=" ")
+        else:
+            print(Fore.RED + self.board[self.cursor.y][self.cursor.x], end=" ")
         moveConsoleCursor(self.cursor.x*2,self.cursor.y)
-    
+        
+        if self.isMarking:
+            currentPosition = (self.cursor.x,self.cursor.y)
+            if calculateVectorLength(self.currentMark[0], currentPosition) < len(self.currentMark):
+                unmarkedPosition = self.currentMark.pop(-1)
+                moveConsoleCursor(unmarkedPosition[0]*2,unmarkedPosition[1])
+                print(self.board[unmarkedPosition[1]][unmarkedPosition[0]], end=" ")
+            else:
+                self.currentMark.append(currentPosition)
+
+
+        ########## Debuggin stuff, delete later ######################
+        moveConsoleCursor(0,self.height+4+len(self.hiddenWords))
+        print(self.currentMark)
+        print(self.isMarking)
+
+
     def addWord(self, word):
         length = len(word)
         hidWord = HiddenWord(word,self.width-length,self.height-length)
 
 
-        ## TODO: Reformat this mess.s
+        ## TODO: Reformat this mess
         ## TODO: If the board is too small, there is a chance that it will not be able to place a word and get
         ##       stuck in a loop trying to reroll the coordinates until it can be placed.
         isInOccupiedSpaces = True
@@ -118,6 +130,29 @@ class Board():
         print("Words to search:")
         for word in self.hiddenWords:
             print("- " + word.word)
+        print("==============================")
+    
+    def toggleMarking(self):
+        if self.isMarking:
+            self.isMarking = False
+            self.currentMark = []
+        else:
+            self.isMarking = True
+            currentPosition = (self.cursor.x,self.cursor.y)
+            self.currentMark = [currentPosition]
+    
+    def getDirectionOfCurrentMark(self):
+        if self.isMarking and len(self.currentMark) > 1:
+            if self.currentMark[0][0] == self.currentMark[-1][0]:
+                return "vertical"
+            elif self.currentMark[0][1] == self.currentMark[-1][1]:
+                return "horizontal"
+            else:
+                raise ValueError("Something wrong in mark coordinates!" + str(self.currentMark))
+        else:
+            return None
+
+
 
         
 
