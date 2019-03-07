@@ -28,7 +28,6 @@ class Board():
         self.hiddenWords = []
         self.board = [[" "  for _ in range(width)] for _ in range (height)]
         self.cursor = Cursor(width - 1, height - 1)
-        self.markedSpaces = []
         self.currentMark = []
         self.isMarking = False
         self.wordsFound = 0
@@ -129,11 +128,21 @@ class Board():
         print("==============================")
         print("Words to search:")
         for word in self.hiddenWords:
-            print("- " + word.word)
+            print("- " + word.word)#+ str(word.spaces))
         print("==============================")
     
     def toggleMarking(self):
         if self.isMarking:
+            currentMarkReversed = reversed(self.currentMark)
+            for i, word in enumerate(self.hiddenWords):
+                if word.spaces == self.currentMark or word.spaces == currentMarkReversed:
+                    word.found = True
+                    self.wordsFound += 1
+                    moveConsoleCursor(0,self.height+2+i)
+                    print(Fore.GREEN + "- " + word.word)
+
+
+
             self.isMarking = False
             self.currentMark = []
         else:
@@ -165,6 +174,8 @@ class HiddenWord():
 
         self.spaces = [(randint(0,limit_x),randint(0,limit_y))]
         self.calculateSpaces(limit_x, limit_y)
+
+        self.found = False
  
     def calculateSpaces(self, x, y):
         for _ in self.word:
@@ -173,6 +184,7 @@ class HiddenWord():
                 self.spaces.append((lastCoord[0],lastCoord[1]+1))
             else:
                 self.spaces.append((lastCoord[0]+1,lastCoord[1]))
+        self.spaces.pop(-1)
 
     def rerollCoordinates(self, limit_x, limit_y):
         self.spaces = [(randint(0,limit_x),randint(0,limit_y))]
