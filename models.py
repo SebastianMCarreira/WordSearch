@@ -29,6 +29,7 @@ class Board():
         self.board = [[" "  for _ in range(width)] for _ in range (height)]
         self.cursor = Cursor(width - 1, height - 1)
         self.currentMark = []
+        self.permanentMark = []
         self.isMarking = False
         self.wordsFound = 0
 
@@ -70,20 +71,21 @@ class Board():
                 print("")
 
     def update(self):
+        currentPosition = (self.cursor.x,self.cursor.y)
         moveConsoleCursor(self.cursor.lastX*2,self.cursor.lastY)
-        if self.isMarking:
+        if self.isMarking or (self.cursor.lastX,self.cursor.lastY) in self.permanentMark:
             print(Fore.BLACK + Back.WHITE + self.board[self.cursor.lastY][self.cursor.lastX], end=" ")
         else:
             print(self.board[self.cursor.lastY][self.cursor.lastX], end=" ")
         moveConsoleCursor(self.cursor.x*2,self.cursor.y)
-        if self.isMarking:
+        if self.isMarking or currentPosition in self.permanentMark:
             print(Fore.RED + Back.WHITE + self.board[self.cursor.y][self.cursor.x], end=" ")
         else:
             print(Fore.RED + self.board[self.cursor.y][self.cursor.x], end=" ")
         moveConsoleCursor(self.cursor.x*2,self.cursor.y)
         
         if self.isMarking:
-            currentPosition = (self.cursor.x,self.cursor.y)
+            
             if calculateVectorLength(self.currentMark[0], currentPosition) < len(self.currentMark):
                 unmarkedPosition = self.currentMark.pop(-1)
                 moveConsoleCursor(unmarkedPosition[0]*2,unmarkedPosition[1])
@@ -140,8 +142,9 @@ class Board():
                     self.wordsFound += 1
                     moveConsoleCursor(0,self.height+2+i)
                     print(Fore.GREEN + "- " + word.word)
-
-
+                    self.permanentMark.extend(self.currentMark)
+                    moveConsoleCursor(self.cursor.x*2,self.cursor.y)
+                    print(Fore.RED + Back.WHITE + self.board[self.cursor.y][self.cursor.x], end=" ")
 
             self.isMarking = False
             self.currentMark = []
