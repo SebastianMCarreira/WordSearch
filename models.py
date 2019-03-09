@@ -190,11 +190,11 @@ class Board():
     def showYouWin(self):
         startOfPopup = (self.height//2)-2
         moveConsoleCursor(0,startOfPopup)
-        print("╔" + ("═"*(self.width+3)) + "╗")
-        print("║" + (" "*(self.width+3)) + "║")
-        print("║" + "You Win!".center(self.width+3," ") + "║")
-        print("║" + (" "*(self.width+3)) + "║")
-        print("╚" + ("═"*(self.width+3)) + "╝")
+        print("╔" + ("═"*(self.width*2-3)) + "╗")
+        print("║" + (" "*(self.width*2-3)) + "║")
+        print("║" + "You Win!".center(self.width*2-3," ") + "║")
+        print("║" + (" "*(self.width*2-3)) + "║")
+        print("╚" + ("═"*(self.width*2-3)) + "╝")
 
 
 
