@@ -145,6 +145,10 @@ class Board():
                     moveConsoleCursor(0,self.height+2+i)
                     print(Fore.GREEN + "- " + word.word)
                     self.permanentMark.extend(self.currentMark)
+
+                    if self.gameIsWon():
+                        self.showYouWin()
+
                     break
 
             if not foundOne:
@@ -176,6 +180,21 @@ class Board():
                 raise ValueError("Something wrong in mark coordinates!" + str(self.currentMark))
         else:
             return None
+
+    def gameIsWon(self):
+        for word in self.hiddenWords:
+            if not word.found:
+                return False
+        return True
+
+    def showYouWin(self):
+        startOfPopup = (self.height//2)-2
+        moveConsoleCursor(0,startOfPopup)
+        print("╔" + ("═"*(self.width+3)) + "╗")
+        print("║" + (" "*(self.width+3)) + "║")
+        print("║" + "You Win!".center(self.width+3," ") + "║")
+        print("║" + (" "*(self.width+3)) + "║")
+        print("╚" + ("═"*(self.width+3)) + "╝")
 
 
 
