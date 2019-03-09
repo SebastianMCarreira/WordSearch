@@ -8,9 +8,6 @@ import keyboard
 
 init(autoreset=True, convert=True, strip=True)
 
-if os.name == "nt":
-    from ctypes import windll, c_short, c_char_p, Structure
-
 
 with open("words.txt") as f:
     words = [x.strip() for x in f.readlines()]

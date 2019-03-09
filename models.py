@@ -136,15 +136,25 @@ class Board():
     def toggleMarking(self):
         if self.isMarking:
             currentMarkReversed = reversed(self.currentMark)
+            foundOne = False
             for i, word in enumerate(self.hiddenWords):
                 if word.spaces == self.currentMark or word.spaces == currentMarkReversed:
+                    foundOne = True
                     word.found = True
                     self.wordsFound += 1
                     moveConsoleCursor(0,self.height+2+i)
                     print(Fore.GREEN + "- " + word.word)
                     self.permanentMark.extend(self.currentMark)
-                    moveConsoleCursor(self.cursor.x*2,self.cursor.y)
-                    print(Fore.RED + Back.WHITE + self.board[self.cursor.y][self.cursor.x], end=" ")
+                    break
+
+            if not foundOne:
+                lastMark = self.currentMark.pop(-1)
+                for markedSpace in self.currentMark:
+                    moveConsoleCursor(markedSpace[0]*2,markedSpace[1])
+                    print(self.board[markedSpace[1]][markedSpace[0]], end=" ")
+                moveConsoleCursor(lastMark[0]*2,lastMark[1])
+                print(Fore.RED + self.board[lastMark[1]][lastMark[0]], end=" ")
+
 
             self.isMarking = False
             self.currentMark = []
@@ -152,6 +162,9 @@ class Board():
             self.isMarking = True
             currentPosition = (self.cursor.x,self.cursor.y)
             self.currentMark = [currentPosition]
+            moveConsoleCursor(self.cursor.x*2,self.cursor.y)
+            print(Fore.RED + Back.WHITE + self.board[self.cursor.y][self.cursor.x], end=" ")
+
     
     def getDirectionOfCurrentMark(self):
         if self.isMarking and len(self.currentMark) > 1:
