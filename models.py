@@ -2,7 +2,7 @@ from random import randint, choices
 from itertools import product
 from colorama import Back, Fore
 
-from auxiliary_functions import moveConsoleCursor, calculateVectorLength
+from auxiliary_functions import moveConsoleCursor, calculateVectorLength, clearConsole
 
 LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
@@ -193,9 +193,15 @@ class Board():
         print("╔" + ("═"*(self.width*2-3)) + "╗")
         print("║" + (" "*(self.width*2-3)) + "║")
         print("║" + "You Win!".center(self.width*2-3," ") + "║")
+        print("║" + "Press Enter".center(self.width*2-3," ") + "║")
         print("║" + (" "*(self.width*2-3)) + "║")
         print("╚" + ("═"*(self.width*2-3)) + "╝")
 
+    def startGame(self):
+        self.fillRandom()
+        clearConsole()
+        self.show()
+        self.showWords()
 
 
         

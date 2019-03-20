@@ -22,3 +22,13 @@ def calculateVectorLength(pointA, pointB):
     x = pointA[0] - pointB[0]
     y = pointA[1] - pointB[1]
     return math.sqrt(x**2+y**2)
+
+
+def clearConsole():
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')
+
+
+    
